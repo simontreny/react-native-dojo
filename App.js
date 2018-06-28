@@ -1,60 +1,81 @@
 import React from 'react';
 import {
-  Platform,
+  FlatList,
   StyleSheet,
   Text,
   View
 } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
 export default class App extends React.Component {
   state = { stations: [] };
 
   async componentDidMount() {
-    const response = await fetch("https://ws.infotbm.com/ws/1.0/vcubs");
+    const response = await fetch("https://ws.infotbm.com/ws/1.0/vcubs")
     const json = await response.json();
     this.setState({ stations: json.lists });
     console.log("Stations", json.lists);
-}
+  }
 
   render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-      </View>
-    );
+    return <StationListView stations={this.state.stations} />;
+  }
+}
+
+class StationListView extends React.Component {
+  render() {
+    return <FlatList
+      style={{flex: 1}}
+      data={this.props.stations}
+      renderItem={({item}) => this.renderStationCell(item)}
+      keyExtractor={item => item.id.toString()}
+    />;
+  }
+
+  renderStationCell(station) {
+    return <View style={styles.cell}>
+      <Text style={styles.stationName}>{station.name}</Text>
+      <Text style={[styles.bikeCount, {backgroundColor: getColorForStation(station)}]}>
+        {station.nbBikeAvailable}
+      </Text>
+      <View style={styles.separator} />
+    </View>;
+  }
+}
+
+function getColorForStation(station) {
+  if (station.nbBikeAvailable === 0) {
+    return "red";
+  } else if (station.nbBikeAvailable <= 3) {
+    return "orange";
+  } else {
+    return "green";
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+  cell: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    height: 64
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  stationName: {
+    flex: 1
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  bikeCount: {
+    fontWeight: "bold",
+    color: "white",
+    backgroundColor: "green",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 5
   },
+  separator: {
+    position: "absolute",
+    height: 1,
+    left: 10,
+    right: 10,
+    bottom: 1,
+    backgroundColor: "#eeeeee"
+  }
 });
