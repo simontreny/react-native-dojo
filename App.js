@@ -5,6 +5,7 @@ import {
   Text,
   View
 } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 
 export default class App extends React.Component {
   state = { stations: [] };
@@ -17,7 +18,10 @@ export default class App extends React.Component {
   }
 
   render() {
-    return <StationListView stations={this.state.stations} />;
+    return <View style={{flex: 1}}>
+      <StationMapView stations={this.state.stations} />
+      <StationListView stations={this.state.stations} />
+    </View>;
   }
 }
 
@@ -39,6 +43,33 @@ class StationListView extends React.Component {
       </Text>
       <View style={styles.separator} />
     </View>;
+  }
+}
+
+class StationMapView extends React.Component {
+  render() {
+    const initialRegion = {
+      latitude: 44.8433013,
+      longitude: -0.5713345,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01
+    }
+    return <MapView style={{flex: 2}} initialRegion={initialRegion}>
+      {this.props.stations.map(it => this.renderStationMarker(it))}
+    </MapView>;
+  }
+
+  renderStationMarker(station) {
+    return <Marker
+      key={station.id}
+      coordinate={{
+        latitude: parseFloat(station.latitude),
+        longitude: parseFloat(station.longitude)
+      }}
+      title={station.name}
+      description={`Vélos disponibles : ${station.nbBikeAvailable}`}
+      pinColor={getColorForStation(station)}
+    />;
   }
 }
 
