@@ -14,6 +14,15 @@ const instructions = Platform.select({
 });
 
 export default class App extends React.Component {
+  state = { stations: [] };
+
+  async componentDidMount() {
+    const response = await fetch("https://ws.infotbm.com/ws/1.0/vcubs");
+    const json = await response.json();
+    this.setState({ stations: json.lists });
+    console.log("Stations", json.lists);
+}
+
   render() {
     return (
       <View style={styles.container}>
